@@ -13,7 +13,6 @@ class AuthGate extends StatefulWidget {
 
 class _AuthGateState extends State<AuthGate> {
   final storage = const FlutterSecureStorage();
-
   bool loading = true;
   bool loggedIn = false;
 

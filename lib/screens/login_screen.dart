@@ -84,8 +84,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: 25),
               Card(
                 color: Colors.white,
-                borderOnForeground: true,
-                margin: const EdgeInsets.all(20),
+                margin: const EdgeInsets.all(30),
                 shape:
                 RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                 child: Padding(

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'dart:async';
-
 import '../auth_gate.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -23,7 +22,7 @@ class _SplashScreenState extends State<SplashScreen>
     controller =
         AnimationController(vsync: this, duration: const Duration(seconds: 2));
 
-    fadeAnimation = CurvedAnimation(parent: controller, curve: Curves.easeIn);
+    fadeAnimation = CurvedAnimation(parent: controller, curve: Curves.elasticIn);
 
     controller.forward();
 
@@ -47,10 +46,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor: isDark ? Colors.black : Colors.white,
+      backgroundColor: Colors.white,
       body: FadeTransition(
         opacity: fadeAnimation,
         child: Column(
@@ -69,19 +67,10 @@ class _SplashScreenState extends State<SplashScreen>
               child: Column(
                 children: [
                   Text(
-                    "Made by ",
+                    "© Harman",
                     style: TextStyle(
                       color: Colors.grey.shade500,
                       fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  Text(
-                    "Harman",
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: isDark ? Colors.tealAccent : Colors.teal,
                     ),
                   ),
                 ],
