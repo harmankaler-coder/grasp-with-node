@@ -1,0 +1,13 @@
+# Node
+node_modules/
+.env
+
+# Flutter
+.dart_tool/
+build/
+android/.gradle/
+ios/Pods/
+
+# Mac/Windows
+.DS_Store
+Thumbs.db
