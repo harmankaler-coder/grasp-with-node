@@ -16,45 +16,73 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final passwordController = TextEditingController();
 
   bool loading = false;
+  bool obscure = true;
+
+  final baseUrl = "http://10.0.2.2:3000/api/auth/register";
+
+  bool isValidEmail(String email) {
+    return RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(email);
+  }
 
   Future<void> registerUser() async {
-    setState(() => loading = true);
+    final name = nameController.text.trim();
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
 
-    final url = Uri.parse("http://10.0.2.2:3000/api/auth/register");
+    if (name.isEmpty || email.isEmpty || password.isEmpty) {
+      showMsg("All fields required");
+      return;
+    }
+
+    if (!isValidEmail(email)) {
+      showMsg("Enter valid email");
+      return;
+    }
+
+    if (password.length < 8) {
+      showMsg("Password must be at least 8 characters");
+      return;
+    }
+
+    setState(() => loading = true);
 
     try {
       final res = await http.post(
-        url,
+        Uri.parse(baseUrl),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
-          "name": nameController.text.trim(),
-          "email": emailController.text.trim(),
-          "password": passwordController.text.trim(),
+          "name": name,
+          "email": email,
+          "password": password,
         }),
       );
 
       final data = jsonDecode(res.body);
 
-      if (res.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Registered! Login now")),
-        );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        showMsg("Registered! Login now", success: true);
 
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const LoginScreen()),
         );
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data["msg"] ?? "Register failed")),
-        );
+        showMsg(data["error"] ?? "Register failed");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text("Error $e")));
+      showMsg("Server error");
     }
 
     setState(() => loading = false);
+  }
+
+  void showMsg(String msg, {bool success = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(msg),
+        backgroundColor: success ? Colors.teal : Colors.red,
+      ),
+    );
   }
 
   @override
@@ -68,25 +96,27 @@ class _RegisterScreenState extends State<RegisterScreen> {
           child: Column(
             children: [
               const SizedBox(height: 50),
+
               Image.asset(
                 "assets/logo/grasp-logo.png",
                 width: 250,
                 height: 200,
               ),
+
               const SizedBox(height: 25),
+
               Card(
                 color: Colors.white,
-                borderOnForeground: true,
                 margin: const EdgeInsets.all(20),
-                shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
                 child: Padding(
                   padding: const EdgeInsets.all(25),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text("Create Account",
-                          style: theme.textTheme.headlineSmall),
+                      Text("Create Account", style: theme.textTheme.headlineSmall),
                       const SizedBox(height: 25),
 
                       TextField(
@@ -94,10 +124,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(30)),
-                            borderSide: BorderSide(color: Colors.teal),
                           ),
                           labelText: "Name",
-                          labelStyle: TextStyle(color: Colors.grey),
                           prefixIcon: Icon(Icons.person, color: Colors.teal),
                         ),
                       ),
@@ -108,30 +136,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         decoration: const InputDecoration(
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(30)),
-                            borderSide: BorderSide(color: Colors.teal),
                           ),
                           labelText: "Email",
-                          labelStyle: TextStyle(color: Colors.grey),
                           prefixIcon: Icon(Icons.email, color: Colors.teal),
                         ),
                       ),
-
                       const SizedBox(height: 15),
-
                       TextField(
                         controller: passwordController,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(
+                        obscureText: obscure,
+                        decoration: InputDecoration(
+                          border: const OutlineInputBorder(
                             borderRadius: BorderRadius.all(Radius.circular(30)),
-                            borderSide: BorderSide(color: Colors.teal),
                           ),
-                          labelText: "Password",
-                          labelStyle: TextStyle(color: Colors.grey),
-                          prefixIcon: Icon(Icons.lock, color: Colors.teal),
+                          labelText: "Password (min 8 chars)",
+                          prefixIcon: const Icon(Icons.lock, color: Colors.teal),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              obscure ? Icons.visibility : Icons.visibility_off,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              setState(() => obscure = !obscure);
+                            },
+                          ),
                         ),
                       ),
-
                       const SizedBox(height: 20),
 
                       SizedBox(
@@ -153,8 +183,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         onPressed: () {
                           Navigator.pushReplacement(
                             context,
-                            MaterialPageRoute(
-                                builder: (_) => const LoginScreen()),
+                            MaterialPageRoute(builder: (_) => const LoginScreen()),
                           );
                         },
                         child: const Text("Already have account? Login"),

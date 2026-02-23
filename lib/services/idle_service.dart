@@ -4,13 +4,15 @@ import 'dart:ui';
 class IdleService {
   static Timer? timer;
 
-  static void start(VoidCallback onTimeout) {
+  static void start(VoidCallback onTimeout,
+      {Duration duration = const Duration(minutes: 15)}) {
     timer?.cancel();
-    timer = Timer(const Duration(minutes: 10), onTimeout);
+    timer = Timer(duration, onTimeout);
   }
 
-  static void reset(VoidCallback onTimeout) {
-    start(onTimeout);
+  static void reset(VoidCallback onTimeout,
+      {Duration duration = const Duration(minutes: 15)}) {
+    start(onTimeout, duration: duration);
   }
 
   static void stop() {
